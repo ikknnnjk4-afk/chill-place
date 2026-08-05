@@ -43,17 +43,30 @@ void Room::Load() {
     texCeiling = LoadTexture("textures/texture_de_plafond.jpg");
     texWall    = LoadTexture("textures/texture_de_mur.jpg");
 
-    // Enable texture repeat
-    SetTextureFilter(texFloor,   TEXTURE_FILTER_BILINEAR);
-    SetTextureFilter(texCeiling, TEXTURE_FILTER_BILINEAR);
-    SetTextureFilter(texWall,    TEXTURE_FILTER_BILINEAR);
-    SetTextureWrap(texFloor,   TEXTURE_WRAP_REPEAT);
-    SetTextureWrap(texCeiling, TEXTURE_WRAP_REPEAT);
-    SetTextureWrap(texWall,    TEXTURE_WRAP_REPEAT);
+    if (texFloor.id == 0 || texCeiling.id == 0 || texWall.id == 0) {
+        TraceLog(LOG_ERROR, "Room: one or more textures failed to load");
+    }
 
-    // 3D models
+    // Enable texture repeat (only if valid)
+    if (texFloor.id > 0) {
+        SetTextureFilter(texFloor, TEXTURE_FILTER_BILINEAR);
+        SetTextureWrap(texFloor, TEXTURE_WRAP_REPEAT);
+    }
+    if (texCeiling.id > 0) {
+        SetTextureFilter(texCeiling, TEXTURE_FILTER_BILINEAR);
+        SetTextureWrap(texCeiling, TEXTURE_WRAP_REPEAT);
+    }
+    if (texWall.id > 0) {
+        SetTextureFilter(texWall, TEXTURE_FILTER_BILINEAR);
+        SetTextureWrap(texWall, TEXTURE_WRAP_REPEAT);
+    }
+
+    // 3D models – load carefully (GLB can be heavy on some GPUs)
     modelSofa = LoadModel("models/canape.glb");
     modelYoyo = LoadModel("models/yoyo.glb");
+
+    if (modelSofa.meshCount == 0) TraceLog(LOG_WARNING, "Room: canape.glb failed to load");
+    if (modelYoyo.meshCount == 0) TraceLog(LOG_WARNING, "Room: yoyo.glb failed to load");
 
     loaded = true;
 }
@@ -106,10 +119,12 @@ void Room::DrawWalls() const {
 
 void Room::DrawFurniture() const {
     // Sofa at the back of the room, centred
-    DrawModel(modelSofa, { 0.0f, 0.0f, 8.5f }, 1.0f, WHITE);
+    if (modelSofa.meshCount > 0)
+        DrawModel(modelSofa, { 0.0f, 0.0f, 8.5f }, 1.0f, WHITE);
 
     // Yoyo slightly to the right, mid-room
-    DrawModel(modelYoyo, { 1.5f, 0.8f, 5.0f }, 0.6f, WHITE);
+    if (modelYoyo.meshCount > 0)
+        DrawModel(modelYoyo, { 1.5f, 0.8f, 5.0f }, 0.6f, WHITE);
 }
 
 void Room::Unload() {

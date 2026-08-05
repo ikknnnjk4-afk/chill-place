@@ -11,13 +11,14 @@ void GameApp::Init() {
     camera.fovy       = 75.0f;
     camera.projection = CAMERA_PERSPECTIVE;
 
-    scene.Load();
+    // Load menu first so something shows even if 3D assets fail
     menu.Load();
+    input.Init();
+    scene.Load();
     hud.Load();
     audio.Init();
-    input.Init();
 
-    // Start ambient audio
+    // Start ambient audio (currently no-op if no music file)
     audio.PlayAmbient();
 }
 
