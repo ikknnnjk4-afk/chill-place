@@ -13,12 +13,12 @@ if(ANDROID)
     set(CUSTOMIZE_BUILD OFF                       CACHE BOOL   "" FORCE)
 endif()
 
-# ── Fetch raylib 5.0 ─────────────────────────────────────────────────────────
+# ── Fetch raylib 5.5 (fixes Android 12/13/14 threading / looper crashes) ────
 include(FetchContent)
 FetchContent_Declare(
     raylib
     GIT_REPOSITORY https://github.com/raysan5/raylib.git
-    GIT_TAG        5.0
+    GIT_TAG        5.5
     GIT_SHALLOW    TRUE
 )
 FetchContent_MakeAvailable(raylib)
