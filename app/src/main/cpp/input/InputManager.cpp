@@ -1,5 +1,6 @@
 #include "InputManager.h"
 #include "raylib.h"
+#include "raymath.h"
 #include <cmath>
 
 void InputManager::Init() {

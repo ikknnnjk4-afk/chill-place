@@ -1,5 +1,6 @@
 #include "HUD.h"
 #include "raylib.h"
+#include "raymath.h"
 #include <cstring>
 #include <jni.h>
 #include <android/log.h>
