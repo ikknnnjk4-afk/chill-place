@@ -1,0 +1,24 @@
+# Android build outputs
+*.iml
+.gradle/
+local.properties
+/.idea/
+.DS_Store
+/build/
+app/build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# CMake cache
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Keystore (never commit real keystores)
+*.jks
+*.keystore
+
+# Gradle wrapper jar (large binary — downloaded by CI)
+!gradle/wrapper/gradle-wrapper.jar
