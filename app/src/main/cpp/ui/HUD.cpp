@@ -18,20 +18,26 @@ static std::string GetGroqApiKey() {
     JNIEnv* env = nullptr;
     bool attached = false;
     if (gJavaVM->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) == JNI_EDETACHED) {
-        gJavaVM->AttachCurrentThread(&env, nullptr);
+        if (gJavaVM->AttachCurrentThread(&env, nullptr) != 0 || !env) return "";
         attached = true;
     }
+    if (!env) return "";
 
     std::string key;
     jclass cls = env->FindClass("com/chillplace/game/BuildConfig");
+    if (env->ExceptionCheck()) { env->ExceptionClear(); cls = nullptr; }
     if (cls) {
         jfieldID fid = env->GetStaticFieldID(cls, "GROQ_API_KEY", "Ljava/lang/String;");
+        if (env->ExceptionCheck()) { env->ExceptionClear(); fid = nullptr; }
         if (fid) {
             jstring jkey = reinterpret_cast<jstring>(env->GetStaticObjectField(cls, fid));
+            if (env->ExceptionCheck()) { env->ExceptionClear(); jkey = nullptr; }
             if (jkey) {
                 const char* ckey = env->GetStringUTFChars(jkey, nullptr);
-                key = ckey;
-                env->ReleaseStringUTFChars(jkey, ckey);
+                if (ckey) {
+                    key = ckey;
+                    env->ReleaseStringUTFChars(jkey, ckey);
+                }
                 env->DeleteLocalRef(jkey);
             }
         }
@@ -45,12 +51,14 @@ static std::string GetGroqApiKey() {
 void HUD::Load() {
     int sw = GetScreenWidth();
     int sh = GetScreenHeight();
+    if (sw <= 0) sw = 1280;
+    if (sh <= 0) sh = 720;
 
     // Virtual joystick on the left
     joyCenter = { (float)(sw * 0.13f), (float)(sh * 0.75f) };
     joyPos    = joyCenter;
 
-    // Init Groq client
+    // Init Groq client (safe – never crashes the game if key missing)
     apiKey = GetGroqApiKey();
     if (!apiKey.empty()) {
         groq = std::make_unique<GroqClient>(apiKey);

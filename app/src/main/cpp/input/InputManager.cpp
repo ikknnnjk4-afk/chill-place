@@ -6,9 +6,10 @@
 void InputManager::Init() {
     int sw = GetScreenWidth();
     int sh = GetScreenHeight();
+    if (sw <= 0) sw = 1280;
+    if (sh <= 0) sh = 720;
     joyCenter = { (float)(sw * 0.13f), (float)(sh * 0.75f) };
 
-    // Enable gesture detection
     SetGesturesEnabled(GESTURE_TAP | GESTURE_DRAG | GESTURE_HOLD);
 }
 
@@ -23,10 +24,11 @@ void InputManager::Update() {
 
 void InputManager::UpdateTouch() {
     int sw = GetScreenWidth();
+    if (sw <= 0) return;
+
     const float joyRadius = sw * 0.09f;
     int count = GetTouchPointCount();
 
-    // Reset joystick if no fingers
     if (count == 0) {
         joyActive  = false;
         joyFinger  = -1;
@@ -35,24 +37,24 @@ void InputManager::UpdateTouch() {
         return;
     }
 
+    // Clamp count to a sane max (defensive)
+    if (count > 10) count = 10;
+
     for (int i = 0; i < count; i++) {
         Vector2 tp = GetTouchPosition(i);
         float distToJoy = Vector2Distance(tp, joyCenter);
 
-        // Assign finger to joystick (left side)
         if (!joyActive && distToJoy < joyRadius * 2.0f) {
             joyActive = true;
             joyFinger = i;
         }
 
-        // Assign finger to look (right side, not joystick)
         if (!lookActive && tp.x > sw * 0.3f) {
             lookActive = true;
             lookFinger = i;
             lookPrev   = tp;
         }
 
-        // Update joystick delta
         if (joyActive && i == joyFinger) {
             Vector2 delta = Vector2Subtract(tp, joyCenter);
             float d = Vector2Length(delta);
@@ -60,7 +62,6 @@ void InputManager::UpdateTouch() {
             moveDelta = Vector2Scale(delta, 1.0f / joyRadius);
         }
 
-        // Update look delta
         if (lookActive && i == lookFinger) {
             lookDelta = Vector2Subtract(tp, lookPrev);
             lookPrev  = tp;
@@ -69,8 +70,7 @@ void InputManager::UpdateTouch() {
 }
 
 void InputManager::UpdateGyroscope() {
-    // Raylib does not expose raw gyroscope on Android directly.
-    // We leave this as zero; extend with Android sensor APIs via JNI if needed.
+    // Raylib does not expose raw gyroscope on Android by default.
     gyroDelta = { 0.0f, 0.0f };
 }
 

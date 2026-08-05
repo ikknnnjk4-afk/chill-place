@@ -2,13 +2,24 @@
 #include "raylib.h"
 #include "rlgl.h"
 #include "raymath.h"
+#include <android/log.h>
 
-// ── Helper: Draw a textured quad ────────────────────────────────────────────
+#define LOG_TAG "ChillPlace"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+
+// ── Helper: Draw a textured quad (safe if texture id == 0) ──────────────────
 static void DrawTexturedPlane(Texture2D tex,
                               Vector3 pos, Vector3 normal,
                               float w, float h, float tileU, float tileV)
 {
-    // Build a mesh on the fly via rlgl for full texture control
+    // Guard: never call rlSetTexture with invalid id (can SIGSEGV on Mali)
+    if (tex.id == 0) {
+        // Fallback solid plane so the room still exists
+        DrawCube(pos, w, 0.02f, h, DARKGRAY);
+        return;
+    }
+
     Vector3 right = {1, 0, 0};
     if (fabsf(normal.y) > 0.9f) {
         right = {1, 0, 0};
@@ -37,17 +48,14 @@ static void DrawTexturedPlane(Texture2D tex,
 
 void Room::Load() {
     if (loaded) return;
+    LOGI("Room::Load start");
 
-    // Textures — paths are relative to Android assets directory
     texFloor   = LoadTexture("textures/texture_de_sol_.jpg");
     texCeiling = LoadTexture("textures/texture_de_plafond.jpg");
     texWall    = LoadTexture("textures/texture_de_mur.jpg");
 
-    if (texFloor.id == 0 || texCeiling.id == 0 || texWall.id == 0) {
-        TraceLog(LOG_ERROR, "Room: one or more textures failed to load");
-    }
+    LOGI("Textures: floor=%u ceiling=%u wall=%u", texFloor.id, texCeiling.id, texWall.id);
 
-    // Enable texture repeat (only if valid)
     if (texFloor.id > 0) {
         SetTextureFilter(texFloor, TEXTURE_FILTER_BILINEAR);
         SetTextureWrap(texFloor, TEXTURE_WRAP_REPEAT);
@@ -61,14 +69,13 @@ void Room::Load() {
         SetTextureWrap(texWall, TEXTURE_WRAP_REPEAT);
     }
 
-    // 3D models – load carefully (GLB can be heavy on some GPUs)
+    LOGI("Loading models...");
     modelSofa = LoadModel("models/canape.glb");
     modelYoyo = LoadModel("models/yoyo.glb");
-
-    if (modelSofa.meshCount == 0) TraceLog(LOG_WARNING, "Room: canape.glb failed to load");
-    if (modelYoyo.meshCount == 0) TraceLog(LOG_WARNING, "Room: yoyo.glb failed to load");
+    LOGI("Models: sofa meshes=%d yoyo meshes=%d", modelSofa.meshCount, modelYoyo.meshCount);
 
     loaded = true;
+    LOGI("Room::Load done");
 }
 
 void Room::Draw() const {
@@ -92,25 +99,21 @@ void Room::DrawCeiling() const {
 }
 
 void Room::DrawWalls() const {
-    // Back wall  (z = DEPTH, facing -Z)
     DrawTexturedPlane(texWall,
         { 0.0f, HEIGHT/2, DEPTH },
         { 0.0f, 0.0f, -1.0f },
         WIDTH, HEIGHT, 3.0f, 1.0f);
 
-    // Front wall (z = 0, facing +Z)
     DrawTexturedPlane(texWall,
         { 0.0f, HEIGHT/2, 0.0f },
         { 0.0f, 0.0f, 1.0f },
         WIDTH, HEIGHT, 3.0f, 1.0f);
 
-    // Left wall  (x = -W/2, facing +X)
     DrawTexturedPlane(texWall,
         { -WIDTH/2, HEIGHT/2, DEPTH/2 },
         { 1.0f, 0.0f, 0.0f },
         DEPTH, HEIGHT, 3.0f, 1.0f);
 
-    // Right wall (x = +W/2, facing -X)
     DrawTexturedPlane(texWall,
         { WIDTH/2, HEIGHT/2, DEPTH/2 },
         { -1.0f, 0.0f, 0.0f },
@@ -118,21 +121,23 @@ void Room::DrawWalls() const {
 }
 
 void Room::DrawFurniture() const {
-    // Sofa at the back of the room, centred
-    if (modelSofa.meshCount > 0)
+    // Only draw if model actually loaded (meshCount > 0)
+    if (modelSofa.meshCount > 0 && modelSofa.meshes != nullptr)
         DrawModel(modelSofa, { 0.0f, 0.0f, 8.5f }, 1.0f, WHITE);
 
-    // Yoyo slightly to the right, mid-room
-    if (modelYoyo.meshCount > 0)
+    if (modelYoyo.meshCount > 0 && modelYoyo.meshes != nullptr)
         DrawModel(modelYoyo, { 1.5f, 0.8f, 5.0f }, 0.6f, WHITE);
 }
 
 void Room::Unload() {
     if (!loaded) return;
-    UnloadTexture(texFloor);
-    UnloadTexture(texCeiling);
-    UnloadTexture(texWall);
-    UnloadModel(modelSofa);
-    UnloadModel(modelYoyo);
+    if (texFloor.id > 0)   UnloadTexture(texFloor);
+    if (texCeiling.id > 0) UnloadTexture(texCeiling);
+    if (texWall.id > 0)    UnloadTexture(texWall);
+    if (modelSofa.meshCount > 0) UnloadModel(modelSofa);
+    if (modelYoyo.meshCount > 0) UnloadModel(modelYoyo);
+    // Reset to zeroed state
+    texFloor = texCeiling = texWall = Texture2D{};
+    modelSofa = modelYoyo = Model{};
     loaded = false;
 }

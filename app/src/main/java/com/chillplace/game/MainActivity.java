@@ -6,28 +6,24 @@ import android.util.Log;
 import android.view.WindowManager;
 
 /**
- * Custom NativeActivity for better HyperOS / Xiaomi compatibility.
- * Pure android.app.NativeActivity often crashes on launch on Redmi devices.
+ * Thin NativeActivity subclass for HyperOS / Xiaomi stability.
+ * Do NOT call System.loadLibrary here – NativeActivity loads via
+ * android.app.lib_name meta-data. Double-loading the .so crashes
+ * on some devices.
  */
 public class MainActivity extends NativeActivity {
     private static final String TAG = "ChillPlace";
 
-    static {
-        // Load the native library early and explicitly
-        try {
-            System.loadLibrary("game");
-            Log.i(TAG, "libgame.so loaded successfully");
-        } catch (UnsatisfiedLinkError e) {
-            Log.e(TAG, "Failed to load libgame.so", e);
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "MainActivity.onCreate");
-        // Keep screen on
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        try {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } catch (Throwable t) {
+            Log.w(TAG, "KEEP_SCREEN_ON failed", t);
+        }
         super.onCreate(savedInstanceState);
+        Log.i(TAG, "MainActivity.onCreate done");
     }
 
     @Override
@@ -40,5 +36,11 @@ public class MainActivity extends NativeActivity {
     protected void onPause() {
         Log.i(TAG, "MainActivity.onPause");
         super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.i(TAG, "MainActivity.onDestroy");
+        super.onDestroy();
     }
 }

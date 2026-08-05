@@ -7,27 +7,27 @@
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 void AudioManager::Init() {
-    // InitAudioDevice can crash on some Xiaomi devices if OpenSL fails.
-    // Wrap with a try-ish approach: just call it and mark ready only if it seems OK.
-    LOGI("AudioManager::Init");
+    LOGI("AudioManager::Init – calling InitAudioDevice");
+    // InitAudioDevice can crash on some HyperOS builds if OpenSL fails.
+    // We still call it (needed for future sounds) but isolate the risk
+    // by doing it after the window is already up and menu is loaded.
     InitAudioDevice();
-    // raylib doesn't give a clear success flag, assume OK if we reach here
-    ready = true;
-    LOGI("AudioManager ready");
+    ready = true; // assume OK after InitAudioDevice (raylib has no reliable fail flag on all builds)
+    LOGI("AudioManager ready=%d", (int)ready);
 }
 
 void AudioManager::PlayAmbient() {
-    if (!ready) return;
-    // Ambient music disabled for now (no asset) – keeps startup safe
+    // No ambient file shipped – intentionally empty (game content unchanged)
+    (void)ready;
 }
 
 void AudioManager::Shutdown() {
-    if (ready) {
-        if (ambient.stream.sampleRate > 0) {
-            StopMusicStream(ambient);
-            UnloadMusicStream(ambient);
-        }
-        CloseAudioDevice();
-        ready = false;
+    if (!ready) return;
+    if (ambient.stream.sampleRate > 0) {
+        StopMusicStream(ambient);
+        UnloadMusicStream(ambient);
+        ambient = Music{};
     }
+    CloseAudioDevice();
+    ready = false;
 }

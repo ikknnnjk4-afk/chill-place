@@ -50,4 +50,12 @@ target_link_libraries(game
 )
 
 # Suppress warnings for cleaner CI output
-target_compile_options(game PRIVATE -Wno-unused-variable -Wno-unused-parameter)
+target_compile_options(game PRIVATE
+    -Wno-unused-variable
+    -Wno-unused-parameter
+    -fno-strict-aliasing
+)
+# Avoid aggressive opts that sometimes break raylib on Mali
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    target_compile_options(game PRIVATE -O2)
+endif()
