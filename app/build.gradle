@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace 'com.chillplace.game'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.chillplace.game"
         minSdk 24
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -21,6 +21,7 @@ android {
                 cppFlags "-std=c++17 -frtti -fexceptions"
                 arguments "-DANDROID_STL=c++_shared",
                           "-DANDROID_ARM_NEON=TRUE",
+                          "-DANDROID_PLATFORM=android-24",
                           "-DBUILD_EXAMPLES=OFF",
                           "-DBUILD_GAMES=OFF",
                           "-DCUSTOMIZE_BUILD=OFF"
