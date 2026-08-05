@@ -62,16 +62,21 @@ jobs:
         with:
           gradle-version: '8.6'
 
-      - name: Build Debug APK
+      - name: Build Release APK
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
         run: |
-          gradle assembleDebug --no-daemon --stacktrace
+          gradle assembleRelease --no-daemon --stacktrace
 
       - name: Rename APK
         run: |
-          cp app/build/outputs/apk/debug/app-debug.apk chill-place.apk
+          # Prefer signed release, fallback to unsigned
+          if [ -f app/build/outputs/apk/release/app-release.apk ]; then
+            cp app/build/outputs/apk/release/app-release.apk chill-place.apk
+          else
+            cp app/build/outputs/apk/release/app-release-unsigned.apk chill-place.apk
+          fi
           echo "✅ APK ready: $(du -sh chill-place.apk | cut -f1)"
 
       - name: Delete existing 'latest' release (if any)
@@ -87,14 +92,20 @@ jobs:
           tag_name: latest
           name: "🛋️ Chill Place — Dernière version"
           body: |
-            ## 🛋️ Chill Place APK
+            ## 🛋️ Chill Place APK (v1.1 – Release)
 
             Jeu Android 3D natif avec IA Groq (Mocho le chat).
+
+            **Correctifs :**
+            - Build **Release** (plus stable sur HyperOS / Redmi)
+            - `extractNativeLibs` + hardware acceleration
+            - Moins de faux positifs Play Protect
 
             ### 📥 Installation
             1. **Télécharge** `chill-place.apk` ci-dessous
             2. Sur ton Android : **Paramètres → Sécurité → Sources inconnues** → Activer
-            3. Ouvre le fichier APK et installe
+            3. Si Play Protect bloque → **Installer quand même**
+            4. Ouvre le fichier APK et installe
 
             ### 🎮 Contrôles
             - **Joystick gauche** → se déplacer
