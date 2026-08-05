@@ -1,4 +1,5 @@
 #include "GameApp.h"
+#include "CrashReporter.h"
 #include "raylib.h"
 #include "raymath.h"
 #include <cmath>
@@ -11,15 +12,19 @@ void GameApp::Init() {
     camera.fovy       = 75.0f;
     camera.projection = CAMERA_PERSPECTIVE;
 
-    // Load menu first so something shows even if 3D assets fail
+    CrashReporter_Log("menu.Load");
     menu.Load();
+    CrashReporter_Log("input.Init");
     input.Init();
+    CrashReporter_Log("scene.Load");
     scene.Load();
+    CrashReporter_Log("hud.Load");
     hud.Load();
+    CrashReporter_Log("audio.Init");
     audio.Init();
-
-    // Start ambient audio (currently no-op if no music file)
+    CrashReporter_Log("audio.PlayAmbient");
     audio.PlayAmbient();
+    CrashReporter_Log("GameApp::Init complete");
 }
 
 void GameApp::Update(float dt) {

@@ -1,4 +1,5 @@
 #include "Room.h"
+#include "CrashReporter.h"
 #include "raylib.h"
 #include "rlgl.h"
 #include "raymath.h"
@@ -48,7 +49,7 @@ static void DrawTexturedPlane(Texture2D tex,
 
 void Room::Load() {
     if (loaded) return;
-    LOGI("Room::Load start");
+    LOGI("Room::Load start"); CrashReporter_Log("Room::Load start");
 
     texFloor   = LoadTexture("textures/texture_de_sol_.jpg");
     texCeiling = LoadTexture("textures/texture_de_plafond.jpg");
@@ -69,13 +70,13 @@ void Room::Load() {
         SetTextureWrap(texWall, TEXTURE_WRAP_REPEAT);
     }
 
-    LOGI("Loading models...");
+    LOGI("Loading models..."); CrashReporter_Log("Loading models...");
     modelSofa = LoadModel("models/canape.glb");
     modelYoyo = LoadModel("models/yoyo.glb");
     LOGI("Models: sofa meshes=%d yoyo meshes=%d", modelSofa.meshCount, modelYoyo.meshCount);
 
     loaded = true;
-    LOGI("Room::Load done");
+    LOGI("Room::Load done"); CrashReporter_Log("Room::Load done");
 }
 
 void Room::Draw() const {

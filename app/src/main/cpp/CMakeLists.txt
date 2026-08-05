@@ -26,6 +26,7 @@ FetchContent_MakeAvailable(raylib)
 # ── Game source files ─────────────────────────────────────────────────────────
 add_library(game SHARED
     main.cpp
+    CrashReporter.cpp
     GameApp.cpp
     scene/Room.cpp
     scene/Scene.cpp
