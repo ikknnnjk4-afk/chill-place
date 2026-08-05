@@ -24,7 +24,7 @@ android {
                           "-DBUILD_EXAMPLES=OFF",
                           "-DBUILD_GAMES=OFF",
                           "-DCUSTOMIZE_BUILD=OFF"
-                abiFilters 'arm64-v8a', 'armeabi-v7a'
+                abiFilters 'arm64-v8a'
             }
         }
     }
