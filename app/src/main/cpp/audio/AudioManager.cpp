@@ -1,19 +1,24 @@
 #include "AudioManager.h"
 #include "raylib.h"
+#include <android/log.h>
+
+#define LOG_TAG "ChillPlace"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 void AudioManager::Init() {
+    // InitAudioDevice can crash on some Xiaomi devices if OpenSL fails.
+    // Wrap with a try-ish approach: just call it and mark ready only if it seems OK.
+    LOGI("AudioManager::Init");
     InitAudioDevice();
+    // raylib doesn't give a clear success flag, assume OK if we reach here
     ready = true;
+    LOGI("AudioManager ready");
 }
 
 void AudioManager::PlayAmbient() {
     if (!ready) return;
-    // Ambient music (if asset exists — graceful fallback if not)
-    // ambient = LoadMusicStream("sounds/ambient.ogg");
-    // if (ambient.stream.sampleRate > 0) {
-    //     SetMusicVolume(ambient, 0.4f);
-    //     PlayMusicStream(ambient);
-    // }
+    // Ambient music disabled for now (no asset) – keeps startup safe
 }
 
 void AudioManager::Shutdown() {

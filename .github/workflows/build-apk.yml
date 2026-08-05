@@ -92,7 +92,7 @@ jobs:
           tag_name: latest
           name: "🛋️ Chill Place — Dernière version"
           body: |
-            ## 🛋️ Chill Place APK (v1.2 – more robust init + logging)
+            ## 🛋️ Chill Place APK (v1.3 – custom MainActivity (HyperOS fix))
 
             Jeu Android 3D natif avec IA Groq (Mocho le chat).
 
