@@ -5,9 +5,11 @@ class AudioManager {
 public:
     void Init();
     void PlayAmbient();
+    void PlayFootstep();
     void Shutdown();
 
 private:
-    Music ambient = {};
-    bool  ready   = false;
+    bool ready = false;
+    Sound footstep = {};
+    bool hasFootstep = false;
 };

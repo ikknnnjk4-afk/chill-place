@@ -119,7 +119,7 @@ public class LauncherActivity extends Activity {
         root.addView(play);
 
         TextView foot = new TextView(this);
-        foot.setText("v1.6 – launcher Java (sans code natif)");
+        foot.setText("v2.0 – scene fix (sans code natif)");
         foot.setTextColor(Color.GRAY);
         foot.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
         foot.setGravity(Gravity.CENTER);

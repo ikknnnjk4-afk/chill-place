@@ -5,12 +5,14 @@
 #include <cmath>
 
 void GameApp::Init() {
-    // Camera setup – first person starting at the front of the room
-    camera.position   = { 0.0f, 1.65f, 1.0f };
-    camera.target     = { 0.0f, 1.65f, 5.0f };
+    // Start near the front of the room, looking toward the back (sofa / TV)
+    camera.position   = { 0.0f, 1.65f, 1.5f };
+    camera.target     = { 0.0f, 1.65f, 6.0f };
     camera.up         = { 0.0f, 1.0f, 0.0f };
-    camera.fovy       = 75.0f;
+    camera.fovy       = 70.0f;
     camera.projection = CAMERA_PERSPECTIVE;
+    camYaw   = 0.0f;
+    camPitch = 0.0f;
 
     CrashReporter_Log("menu.Load");
     menu.Load();
@@ -22,7 +24,6 @@ void GameApp::Init() {
     hud.Load();
     CrashReporter_Log("audio.Init");
     audio.Init();
-    CrashReporter_Log("audio.PlayAmbient");
     audio.PlayAmbient();
     CrashReporter_Log("GameApp::Init complete");
 }
@@ -37,17 +38,31 @@ void GameApp::Update(float dt) {
             }
             break;
 
-        case GameState::PLAYING:
+        case GameState::PLAYING: {
             UpdateCamera(dt);
-            scene.Update(dt);
+            scene.Update(dt, camera.position);
             hud.Update(dt);
 
-            // Open AI chat when tapping the bottom-right area or back button
+            // Footsteps when moving
+            Vector2 move = input.GetMoveDelta();
+            bool moving = (fabsf(move.x) + fabsf(move.y)) > 0.15f;
+            if (moving) {
+                stepTimer += dt;
+                if (stepTimer > 0.45f) {
+                    stepTimer = 0.0f;
+                    audio.PlayFootstep();
+                }
+            } else {
+                stepTimer = 0.0f;
+            }
+            wasMoving = moving;
+
             if (hud.ChatButtonPressed()) {
                 state = GameState::AI_CHAT;
                 hud.OpenChat();
             }
             break;
+        }
 
         case GameState::AI_CHAT:
             hud.UpdateChat(dt);
@@ -62,82 +77,83 @@ void GameApp::Update(float dt) {
 }
 
 void GameApp::UpdateCamera(float dt) {
-    // Touch-based look (drag to rotate)
     Vector2 touchDelta = input.GetLookDelta();
+    // Look: horizontal drag → yaw, vertical → pitch (not inverted)
+    camYaw   -= touchDelta.x * 0.0035f;
+    camPitch -= touchDelta.y * 0.0035f;
 
-    camYaw   -= touchDelta.x * 0.003f;
-    camPitch -= touchDelta.y * 0.003f;
+    if (camPitch >  1.35f) camPitch =  1.35f;
+    if (camPitch < -1.35f) camPitch = -1.35f;
 
-    // Clamp pitch
-    if (camPitch >  1.4f) camPitch =  1.4f;
-    if (camPitch < -1.4f) camPitch = -1.4f;
-
-    // Gyroscope supplement
     Vector2 gyro = input.GetGyroDelta();
     camYaw   += gyro.x * dt;
     camPitch += gyro.y * dt;
 
-    // Forward vector from yaw/pitch
     Vector3 forward = {
         cosf(camPitch) * sinf(camYaw),
         sinf(camPitch),
         cosf(camPitch) * cosf(camYaw)
     };
+    Vector3 right = Vector3Normalize(Vector3CrossProduct(forward, { 0, 1, 0 }));
 
-    // Walk with virtual joystick (left side of screen)
+    // Movement: joystick Y positive = forward (NOT inverted)
     Vector2 move = input.GetMoveDelta();
-    Vector3 right = Vector3CrossProduct(forward, camera.up);
-    right = Vector3Normalize(right);
-
-    float speed = 3.0f * dt;
+    // move.y > 0 when stick pushed up → walk forward
+    float speed = 2.8f * dt;
     camera.position.x += (forward.x * move.y + right.x * move.x) * speed;
     camera.position.z += (forward.z * move.y + right.z * move.x) * speed;
 
-    // Room boundaries
-    const float ROOM_HALF = 4.8f;
-    const float ROOM_DEPTH = 9.6f;
-    if (camera.position.x < -ROOM_HALF) camera.position.x = -ROOM_HALF;
-    if (camera.position.x >  ROOM_HALF) camera.position.x =  ROOM_HALF;
-    if (camera.position.z < 0.2f)       camera.position.z = 0.2f;
-    if (camera.position.z > ROOM_DEPTH) camera.position.z = ROOM_DEPTH;
+    // Keep player inside room
+    const float margin = 0.4f;
+    float hw = Room::WIDTH * 0.5f - margin;
+    float hd = Room::DEPTH - margin;
+    if (camera.position.x < -hw) camera.position.x = -hw;
+    if (camera.position.x >  hw) camera.position.x =  hw;
+    if (camera.position.z < margin) camera.position.z = margin;
+    if (camera.position.z > hd) camera.position.z = hd;
 
+    camera.position.y = 1.65f;
     camera.target = Vector3Add(camera.position, forward);
 }
 
+void GameApp::DrawScene3D() {
+    BeginMode3D(camera);
+        // Soft ambient fill
+        DrawCube({ 0, Room::HEIGHT * 0.5f, Room::DEPTH * 0.5f },
+                 Room::WIDTH * 0.98f, Room::HEIGHT * 0.98f, Room::DEPTH * 0.98f,
+                 { 255, 255, 255, 0 }); // invisible, just for depth
+        scene.Draw();
+    EndMode3D();
+}
+
 void GameApp::Draw() {
-    ClearBackground(BLACK);
+    BeginDrawing();
+    ClearBackground({ 15, 12, 20, 255 });
 
     switch (state) {
         case GameState::MENU:
             menu.Draw();
             break;
-
         case GameState::PLAYING:
             DrawScene3D();
             hud.Draw();
             break;
-
         case GameState::AI_CHAT:
             DrawScene3D();
             hud.DrawChat();
             break;
-
         case GameState::PAUSED:
             DrawScene3D();
             break;
     }
-}
 
-void GameApp::DrawScene3D() {
-    BeginMode3D(camera);
-    scene.Draw();
-    EndMode3D();
+    EndDrawing();
 }
 
 void GameApp::Shutdown() {
     audio.Shutdown();
+    hud.Unload();
     scene.Unload();
     menu.Unload();
-    hud.Unload();
     input.Shutdown();
 }

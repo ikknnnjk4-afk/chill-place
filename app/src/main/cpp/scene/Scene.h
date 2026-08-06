@@ -5,12 +5,13 @@
 class Scene {
 public:
     void Load();
-    void Update(float dt);
+    void Update(float dt, Vector3 playerPos);
     void Draw() const;
     void Unload();
 
+    Room& GetRoom() { return room; }
+    const Room& GetRoom() const { return room; }
+
 private:
-    Room  room;
-    float yoyoAngle = 0.0f;
-    float ambientLight[4] = { 0.6f, 0.55f, 0.5f, 1.0f };
+    Room room;
 };

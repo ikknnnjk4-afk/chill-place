@@ -1,33 +1,28 @@
 #include "AudioManager.h"
 #include "raylib.h"
-#include <android/log.h>
-
-#define LOG_TAG "ChillPlace"
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+#include <cmath>
+#include <vector>
 
 void AudioManager::Init() {
-    LOGI("AudioManager::Init – calling InitAudioDevice");
-    // InitAudioDevice can crash on some HyperOS builds if OpenSL fails.
-    // We still call it (needed for future sounds) but isolate the risk
-    // by doing it after the window is already up and menu is loaded.
     InitAudioDevice();
-    ready = true; // assume OK after InitAudioDevice (raylib has no reliable fail flag on all builds)
-    LOGI("AudioManager ready=%d", (int)ready);
+    ready = IsAudioDeviceReady();
+    // Procedural short click as footstep placeholder (no wav asset yet)
+    // We'll synthesize a tiny wave into a Sound via raw data if needed later.
+    hasFootstep = false;
 }
 
 void AudioManager::PlayAmbient() {
-    // No ambient file shipped – intentionally empty (game content unchanged)
-    (void)ready;
+    // Ambient loop would load from assets/audio/ – none provided yet
+}
+
+void AudioManager::PlayFootstep() {
+    // Soft tick via raylib SetMasterVolume pulse – real SFX needs assets
+    if (!ready) return;
+    // No-op until footstep wav is added; structure is ready
 }
 
 void AudioManager::Shutdown() {
-    if (!ready) return;
-    if (ambient.stream.sampleRate > 0) {
-        StopMusicStream(ambient);
-        UnloadMusicStream(ambient);
-        ambient = Music{};
-    }
-    CloseAudioDevice();
+    if (hasFootstep) UnloadSound(footstep);
+    if (ready) CloseAudioDevice();
     ready = false;
 }

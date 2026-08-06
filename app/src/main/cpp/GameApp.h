@@ -20,20 +20,21 @@ public:
     void Draw();
     void Shutdown();
 
-    GameState GetState() const { return state; }
-    void SetState(GameState s) { state = s; }
-
 private:
-    GameState       state = GameState::MENU;
-    Scene           scene;
-    Menu            menu;
-    HUD             hud;
-    AudioManager    audio;
-    InputManager    input;
+    GameState    state = GameState::MENU;
+    Scene        scene;
+    Menu         menu;
+    HUD          hud;
+    AudioManager audio;
+    InputManager input;
 
-    Camera3D        camera = {};
-    float           camYaw   = 0.0f;
-    float           camPitch = 0.0f;
+    Camera3D camera = {};
+    float    camYaw   = 0.0f;
+    float    camPitch = 0.0f;
+
+    // Footstep timer
+    float stepTimer = 0.0f;
+    bool  wasMoving = false;
 
     void UpdateCamera(float dt);
     void DrawScene3D();
