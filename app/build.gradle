@@ -10,8 +10,8 @@ android {
         applicationId "com.chillplace.game"
         minSdk 24
         targetSdk 34
-        versionCode 8
-        versionName "1.7-gameactivity"
+        versionCode 9
+        versionName "1.8-native-entry"
 
         // Embed Groq API key at compile time from environment
         buildConfigField "String", "GROQ_API_KEY", "\"${System.getenv('GROQ_API_KEY') ?: ''}\""
