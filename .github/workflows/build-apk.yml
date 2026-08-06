@@ -92,7 +92,7 @@ jobs:
           tag_name: latest
           name: "🛋️ Chill Place — Dernière version"
           body: |
-            ## 🛋️ Chill Place APK (v1.5 – crash reporter (screenshot = log))
+            ## 🛋️ Chill Place APK (v1.6 – Java launcher shows crash without starting 3D)
 
             Jeu Android 3D natif avec IA Groq (Mocho le chat).
 
