@@ -21,9 +21,9 @@
         android:largeHeap="true"
         android:resizeableActivity="false">
 
-        <!-- Pure Java launcher – never loads native lib, can always show crash report -->
+        <!-- Pure Java entry – always opens, even if native crashes -->
         <activity
-            android:name="com.chillplace.game.MainActivity"
+            android:name="com.chillplace.game.LauncherActivity"
             android:label="@string/app_name"
             android:exported="true"
             android:screenOrientation="portrait"
@@ -34,9 +34,9 @@
             </intent-filter>
         </activity>
 
-        <!-- Native 3D game – may crash; report is shown by MainActivity next time -->
+        <!-- Native game (started only from the launcher button) -->
         <activity
-            android:name="com.chillplace.game.GameActivity"
+            android:name="com.chillplace.game.MainActivity"
             android:label="@string/app_name"
             android:exported="false"
             android:screenOrientation="landscape"

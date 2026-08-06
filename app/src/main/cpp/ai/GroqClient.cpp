@@ -1,4 +1,5 @@
 #include "GroqClient.h"
+#include "CrashReporter.h"
 #include "raylib.h"
 #include <thread>
 #include <mutex>
@@ -19,6 +20,8 @@ jobject   gClassLoader = nullptr;
 jmethodID gFindClass   = nullptr;
 
 extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/) {
+    // Earliest possible native crash capture
+    CrashReporter_Install();
     gJavaVM = vm;
 
     JNIEnv* env = nullptr;
