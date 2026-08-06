@@ -1,0 +1,180 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #0a0810;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#c {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+  z-index: 0;
+}
+#overlay {
+  position: fixed; inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+.screen {
+  position: absolute; inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+.hidden { display: none !important; }
+
+/* Title */
+#title-screen { background: #120c1a; }
+#title-bg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+.title-glow {
+  position: relative; z-index: 1;
+  text-align: center;
+}
+#game-title {
+  font-size: clamp(2.2rem, 8vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #c44dff;
+  text-shadow:
+    0 0 8px #00f6ff,
+    0 0 24px #c44dff,
+    0 0 48px #7a00ff,
+    2px 2px 0 #1a0030;
+  animation: blink-title 1.1s ease-in-out infinite;
+}
+@keyframes blink-title {
+  0%, 100% { opacity: 1; filter: hue-rotate(0deg); }
+  50% { opacity: 0.75; filter: hue-rotate(25deg); color: #00eaff; }
+}
+.hint {
+  position: relative; z-index: 1;
+  margin-top: 2rem;
+  color: rgba(200,220,255,0.5);
+  font-size: 1.5rem;
+  letter-spacing: 0.4em;
+}
+
+/* Fade */
+#fade-black {
+  background: #000;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  pointer-events: none;
+}
+#fade-black.show { opacity: 1; }
+
+/* Controller scan */
+#controller-scan {
+  background: #000;
+  color: #c8dcff;
+  text-align: center;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+#controller-scan h2 {
+  font-size: clamp(1.1rem, 4vw, 1.6rem);
+  font-weight: 500;
+  color: #e8f0ff;
+}
+#scan-dots {
+  font-size: 2.5rem;
+  color: #ffe066;
+  min-height: 2.5rem;
+  letter-spacing: 0.15em;
+}
+.scan-list { color: #8899bb; font-size: 0.9rem; }
+#pad-status { color: #6a8; font-size: 0.85rem; margin-top: 0.5rem; }
+
+/* HUD */
+#hud {
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+#crosshair {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 10px; height: 10px;
+  margin: -5px 0 0 -5px;
+  border: 2px solid rgba(255,255,255,0.55);
+  border-radius: 50%;
+}
+#interact-hint {
+  position: absolute;
+  bottom: 18%; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20,10,40,0.75);
+  color: #ffe090;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  border: 1px solid rgba(200,150,255,0.35);
+}
+#tv-ui {
+  position: absolute; inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.35);
+  pointer-events: auto;
+}
+.tv-panel {
+  background: linear-gradient(160deg, #1a3a7a, #0d1f45);
+  border: 3px solid #3a6abf;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  min-width: min(280px, 80vw);
+  text-align: center;
+  box-shadow: 0 0 40px rgba(40,100,255,0.4);
+}
+.tv-label { color: #9cf; margin-bottom: 1rem; letter-spacing: 0.2em; font-size: 0.75rem; }
+.tv-btn {
+  display: block;
+  width: 100%;
+  margin: 0.5rem 0;
+  padding: 0.75rem;
+  font-size: 1.1rem;
+  border: 2px solid #4a7ad0;
+  background: #152a55;
+  color: #e0eeff;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.tv-btn.selected, .tv-btn:hover {
+  background: #2a55aa;
+  border-color: #8cf;
+  box-shadow: 0 0 12px rgba(100,180,255,0.5);
+}
+.tv-help { color: #6a8abb; font-size: 0.7rem; margin-top: 1rem; }
+
+#mocho-bubble {
+  position: absolute;
+  top: 12%; left: 50%;
+  transform: translateX(-50%);
+  max-width: min(360px, 85vw);
+  background: rgba(255,240,220,0.95);
+  color: #301808;
+  padding: 0.75rem 1rem;
+  border-radius: 16px 16px 16px 4px;
+  font-size: 0.95rem;
+  border: 2px solid #e8a060;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+  pointer-events: none;
+}
+#fps {
+  position: absolute;
+  top: 8px; left: 8px;
+  color: rgba(255,255,255,0.35);
+  font-size: 11px;
+  font-family: monospace;
+}

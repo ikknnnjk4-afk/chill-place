@@ -7,6 +7,8 @@
 
     <uses-feature android:name="android.hardware.sensor.gyroscope" android:required="false" />
     <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-feature android:name="android.hardware.gamepad" android:required="false" />
     <uses-feature android:glEsVersion="0x00020000" android:required="true" />
 
     <application
@@ -14,41 +16,43 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
-        android:enableOnBackInvokedCallback="false"
         android:hardwareAccelerated="true"
-        android:extractNativeLibs="true"
         android:usesCleartextTraffic="false"
         android:largeHeap="true"
         android:resizeableActivity="false">
 
-        <!-- Pure Java entry – always opens, even if native crashes -->
+        <!-- Offline WebGL game (Three.js in assets/www) -->
         <activity
-            android:name="com.chillplace.game.LauncherActivity"
+            android:name="com.chillplace.game.WebGameActivity"
             android:label="@string/app_name"
             android:exported="true"
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboardHidden|screenSize|density|uiMode|screenLayout|smallestScreenSize|keyboard|navigation"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- Pure Java intermediate: shows crash report or launches GameActivity -->
+        <!-- Keep pure-Java crash launcher available (optional entry) -->
         <activity
-            android:name="com.chillplace.game.MainActivity"
-            android:label="@string/app_name"
+            android:name="com.chillplace.game.LauncherActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
 
-        <!-- Native 3D game (NativeActivity + libgame.so) -->
+        <activity
+            android:name="com.chillplace.game.MainActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
+
         <activity
             android:name="com.chillplace.game.GameActivity"
-            android:label="@string/app_name"
             android:exported="false"
             android:screenOrientation="landscape"
-            android:configChanges="orientation|keyboardHidden|screenSize|density|uiMode|screenLayout|smallestScreenSize|keyboard|navigation"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
             android:launchMode="singleTask">
             <meta-data

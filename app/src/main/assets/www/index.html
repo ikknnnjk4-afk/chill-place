@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Chill Place</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./js/vendor/three.module.js",
+      "three/addons/": "./js/vendor/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <!-- Menu / overlays -->
+  <div id="overlay">
+    <div id="title-screen" class="screen">
+      <img id="title-bg" src="assets/ui/titre_ecran_menu_principal.png" alt="" />
+      <div class="title-glow">
+        <h1 id="game-title">CHILL PLACE</h1>
+      </div>
+      <p class="hint">…</p>
+    </div>
+
+    <div id="fade-black" class="screen hidden"></div>
+
+    <div id="controller-scan" class="screen hidden">
+      <h2>Recherche des Joy-Con et des manettes…</h2>
+      <div id="scan-dots">.</div>
+      <p class="scan-list">Joy-Con · Switch Pro · Xbox · PS4 · PS5</p>
+      <p id="pad-status">Aucun détecté pour l’instant</p>
+    </div>
+
+    <div id="hud" class="hidden">
+      <div id="crosshair"></div>
+      <div id="interact-hint" class="hidden">Appuie sur A pour interagir</div>
+      <div id="tv-ui" class="hidden">
+        <div class="tv-panel">
+          <p class="tv-label">SMART TV</p>
+          <button data-choice="tiktok" class="tv-btn selected">TikTok</button>
+          <button data-choice="youtube" class="tv-btn">YouTube</button>
+          <p class="tv-help">Manette Switch · A sélectionner · B retour</p>
+        </div>
+      </div>
+      <div id="mocho-bubble" class="hidden"></div>
+      <div id="fps"></div>
+    </div>
+  </div>
+
+  <canvas id="c"></canvas>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
