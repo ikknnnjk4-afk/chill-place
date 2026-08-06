@@ -8,16 +8,6 @@
 </head>
 <body>
 
-  <!-- Filtre SVG pour l'illusion d'optique (distorsion organique progressive) -->
-  <svg id="illusionSVG" style="position:fixed;width:0;height:0;pointer-events:none;overflow:hidden;">
-    <defs>
-      <filter id="opticalIllusion" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="linearRGB">
-        <feTurbulence type="fractalNoise" baseFrequency="0.007 0.005" numOctaves="4" seed="3" id="illusionTurb" result="noise"/>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G" id="illusionDisp"/>
-      </filter>
-    </defs>
-  </svg>
-
   <!-- Écran titre -->
   <div id="titleScreen">
     <div id="titleGlow"></div>
@@ -42,8 +32,33 @@
   <canvas id="fxCanvas"></canvas>
   <div id="vignette"></div>
   <div id="grain"></div>
+  <div id="opticalHalo"></div>
   <div id="flash" class="hidden"></div>
   <div id="blackout" class="hidden"></div>
+
+  <!-- Distorsion optique progressive : elle reste invisible au début et monte seulement
+       à l'approche de la fille, pour garder un rendu organique plutôt que numérique. -->
+  <svg id="opticalFilters" aria-hidden="true">
+    <defs>
+      <filter id="opticalWarp" x="-8%" y="-8%" width="116%" height="116%">
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.006 0.011"
+          numOctaves="2"
+          seed="17"
+          result="slowGlass"
+        />
+        <feDisplacementMap
+          id="opticalDisplacement"
+          in="SourceGraphic"
+          in2="slowGlass"
+          scale="0"
+          xChannelSelector="R"
+          yChannelSelector="G"
+        />
+      </filter>
+    </defs>
+  </svg>
 
   <!-- HUD / contrôles mobiles -->
   <div id="hud">

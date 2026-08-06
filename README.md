@@ -14,8 +14,6 @@ assets/
   wall.jpg           → texture murs (répétable)
   ceiling.jpg        → texture plafond (répétable)
   girl.png           → sprite de la fille (transparence conservée)
-capacitor.config.json → configuration Capacitor pour le build APK
-package.json          → dépendances Capacitor
 ```
 
 ## Tester
@@ -27,36 +25,19 @@ Pour le meilleur rendu mobile, tester dans une WebView Android (Chrome mobile fo
 - **Glisser sur la moitié droite de l'écran** : tourner la tête (regarder autour).
 - Clavier (desktop, pour débug) : ZQSD/WASD + flèches.
 
-## Nouveautés (v1.1)
-- **Secoue d'écran au déplacement** : léger tremblement de caméra proportionnel à la vitesse, comme le poids du corps à chaque pas.
-- **Illusion d'optique progressive** : quand on s'approche vraiment proche de la fille (pas au début — seulement dans le dernier tiers de tension), le monde commence à se déformer organiquement, comme une illusion d'optique qui « respire ». Pas numérique — une distorsion fluide et organique via un filtre SVG feTurbulence.
+## Mise à jour des effets
 
-## Transformer en APK via GitHub Actions
-Le workflow `.github/workflows/build-apk.yml` compile automatiquement un APK à chaque push sur `main`.
+- Le déplacement produit un léger secouement organique de la caméra.
+- À l'approche de la fille, une déformation optique naturelle apparaît progressivement et devient forte seulement dans les derniers instants avant le jumpscare.
 
-### Étapes :
-1. **Pousser ce dossier** sur un dépôt GitHub public ou privé.
-2. **Aller dans Actions** → le workflow `Build Android APK` se déclenche automatiquement.
-3. Une fois terminé, télécharger `le-couloir.apk` depuis les **Artifacts** de la run.
-4. Pour une **Release publique** avec lien stable :
-   - Créer un tag Git : `git tag v1.0.0 && git push origin v1.0.0`
-   - Le workflow crée automatiquement une Release GitHub avec l'APK.
-   - Le lien permanent sera : `https://github.com/USER/REPO/releases/latest/download/le-couloir.apk`
+## Transformer en APK
+Le projet est une simple WebView statique, donc compatible avec :
+- **Capacitor** (recommandé) : `npx cap init`, copier ce dossier dans `www/`, `npx cap add android`, build dans Android Studio.
+- **Cordova** : copier dans `www/`, `cordova platform add android`, `cordova build android`.
+- Aucune de ces étapes ne nécessite d'appel réseau au runtime : le jeu tourne 100% local une fois embarqué.
 
-### Permissions requises dans GitHub
-Dans **Settings → Actions → General → Workflow permissions** :
-- Activer **"Read and write permissions"** (pour la création de Release).
-
-## Build manuel (si vous préférez)
-```bash
-cd game/
-npm install
-npx cap add android
-npx cap sync android
-cd android/
-./gradlew assembleDebug
-# APK dans : android/app/build/outputs/apk/debug/app-debug.apk
-```
+Pense à activer dans le manifest Android : `android:hardwareAccelerated="true"` pour de meilleures performances CSS 3D,
+et à verrouiller l'orientation en `landscape` si tu veux un rendu plus cinématique (sinon le jeu s'adapte aussi au portrait).
 
 ## Réglages rapides (dans js/game.js)
 - `MAX_SPEED` / `STRAFE_SPEED` : vitesse de déplacement.
@@ -65,6 +46,6 @@ cd android/
 - `JUMPSCARE_TRIGGER_DIST` : distance de déclenchement du jumpscare (~1 mètre stylisé).
 
 ## Notes
-- Les textures sol/mur/plafond ont été légèrement compressées (JPEG) et redimensionnées en 512×512 pour rester légères en APK tout en restant répétables sans coupure visible.
+- Les textures sol/mur/plafond ont été légèrement compressées (JPEG) et redimensionnées en 512×512 pour rester
+  légères en APK tout en restant répétables sans coupure visible.
 - Le sprite de la fille a été recadré à sa zone utile (bounding box) en conservant la transparence PNG.
-- Penser à activer dans le manifest Android : `android:hardwareAccelerated="true"` (déjà fait automatiquement par le workflow CI).

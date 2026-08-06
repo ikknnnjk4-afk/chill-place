@@ -40,6 +40,7 @@ html, body {
   perspective-origin:50% 50%;
   overflow:hidden;
   background:#050403;
+  will-change:transform, filter;
 }
 #world{
   position:absolute; inset:0;
@@ -150,6 +151,24 @@ html, body {
   33%{ transform:translate(-3%,2%); }
   66%{ transform:translate(2%,-3%); }
   100%{ transform:translate(0,0); }
+}
+
+#opticalHalo{
+  position:fixed; inset:-12%; z-index:19; pointer-events:none;
+  opacity:0;
+  background:
+    radial-gradient(ellipse at center, transparent 33%, rgba(184,171,143,0.04) 57%, rgba(17,9,3,0.32) 100%),
+    radial-gradient(ellipse at 50% 44%, rgba(230,206,166,0.045), transparent 48%);
+  mix-blend-mode:screen;
+  transform:scale(1.04);
+  will-change:opacity, transform;
+}
+
+#opticalFilters{
+  position:fixed;
+  width:0;
+  height:0;
+  pointer-events:none;
 }
 
 #flash{

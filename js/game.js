@@ -16,6 +16,8 @@
   const MAX_SPEED   = 78;     // unités / seconde à pleine poussée
   const STRAFE_SPEED = 60;
   const FOOTSTEP_DISTANCE = 46; // distance parcourue entre deux pas
+  const OPTICAL_START_DIST = 1800;
+  const OPTICAL_PEAK_DIST = 220;
 
   // ---------- État ----------
   const state = {
@@ -27,6 +29,8 @@
     running: false,
     jumpscareStarted: false,
     ended: false,
+    shake: 0,
+    shakePhase: 0,
   };
 
   // ---------- DOM ----------
@@ -34,23 +38,15 @@
   const girlWrap    = document.getElementById('girlWrap');
   const girl        = document.getElementById('girl');
   const girlLight   = document.getElementById('girlLight');
+  const scene       = document.getElementById('scene');
+  const opticalHalo = document.getElementById('opticalHalo');
+  const opticalDisplacement = document.getElementById('opticalDisplacement');
   const titleScreen = document.getElementById('titleScreen');
   const flash       = document.getElementById('flash');
   const blackout    = document.getElementById('blackout');
   const fxCanvas     = document.getElementById('fxCanvas');
   const endScreen    = document.getElementById('endScreen');
-  const sceneEl      = document.getElementById('scene');
   const ctx2d = fxCanvas.getContext('2d');
-
-  // ---------- Références SVG pour l'illusion d'optique ----------
-  const illusionTurb = document.getElementById('illusionTurb');
-  const illusionDisp = document.getElementById('illusionDisp');
-  let illusionTime = 0;
-  let illusionActive = false;
-
-  // ---------- État du screen shake ----------
-  let shakeX = 0;
-  let shakeY = 0;
 
   function resizeCanvas() {
     fxCanvas.width = window.innerWidth;
@@ -225,6 +221,12 @@
     state.x = Math.max(-CORRIDOR_HALF_WIDTH, Math.min(CORRIDOR_HALF_WIDTH, state.x + dx));
 
     const traveled = Math.abs(state.z - prevZ) + Math.abs(dx);
+    const movementStrength = Math.min(1, traveled / Math.max(dt * MAX_SPEED, 0.001));
+    if (traveled > 0.02) {
+      state.shake = Math.min(1, state.shake + movementStrength * dt * 3.2);
+      state.shakePhase += dt * (7 + movementStrength * 10);
+    }
+    state.shake *= Math.pow(0.055, dt);
     if (traveled > 0.02) {
       state.distSinceStep += traveled;
       if (state.distSinceStep >= FOOTSTEP_DISTANCE) {
@@ -232,19 +234,6 @@
         AudioEngine.footstep();
       }
     }
-
-    // ---- screen shake au mouvement ----
-    if (traveled > 0.1) {
-      // secousse légère proportionnelle à la vitesse, comme un poids corporel
-      const intensity = Math.min(traveled * 0.14, 1.6);
-      shakeX += (Math.random() - 0.5) * intensity * 2.2;
-      shakeY += (Math.random() - 0.5) * intensity * 1.4;
-    }
-    // amortissement rapide pour que ça reste discret
-    shakeX *= 0.78;
-    shakeY *= 0.78;
-    if (Math.abs(shakeX) < 0.01) shakeX = 0;
-    if (Math.abs(shakeY) < 0.01) shakeY = 0;
 
     // ---- tension / battement de coeur ----
     const remaining = GIRL_Z - state.z;
@@ -261,40 +250,20 @@
     document.getElementById('vignette').style.filter = `brightness(${1 - t*0.18})`;
 
     // ---- illusion d'optique progressive ----
-    // Ne commence qu'à partir de ~62% de tension (vraiment proche du screamer, pas au début)
-    const illusionT = Math.max(0, (t - 0.62) / 0.38);
-    illusionTime += dt;
-
-    if (illusionT > 0) {
-      // déplacement quadratique : très progressif au début, intense à la fin
-      const dispScale = illusionT * illusionT * 34;
-      illusionDisp.setAttribute('scale', dispScale.toFixed(2));
-
-      // dérive lente de la fréquence de turbulence pour que ça « respire » organiquement
-      const wobble = Math.sin(illusionTime * 0.28) * illusionT * 0.003;
-      const bfx = (0.007 + wobble).toFixed(6);
-      const bfy = (0.0052 + Math.sin(illusionTime * 0.19 + 1.4) * illusionT * 0.002).toFixed(6);
-      illusionTurb.setAttribute('baseFrequency', `${bfx} ${bfy}`);
-
-      if (!illusionActive) {
-        sceneEl.style.filter = 'url(#opticalIllusion)';
-        illusionActive = true;
-      }
-    } else {
-      if (illusionActive) {
-        sceneEl.style.filter = '';
-        illusionDisp.setAttribute('scale', '0');
-        illusionActive = false;
-      }
+    let distortion = 0;
+    if (remaining < OPTICAL_START_DIST) {
+      distortion = 1 - (remaining - OPTICAL_PEAK_DIST) / (OPTICAL_START_DIST - OPTICAL_PEAK_DIST);
+      distortion = Math.max(0, Math.min(1, distortion));
+      distortion = distortion * distortion * (3 - 2 * distortion);
     }
+    const distortionScale = distortion * distortion * 30;
+    opticalDisplacement.setAttribute('scale', distortionScale.toFixed(2));
+    scene.style.filter = distortion > 0.025 ? 'url(#opticalWarp)' : 'none';
+    opticalHalo.style.opacity = (distortion * distortion * 0.72).toFixed(3);
+    opticalHalo.style.transform = `scale(${(1.04 + distortion * 0.08).toFixed(3)})`;
 
     // ---- déclenchement du jumpscare ----
     if (remaining <= JUMPSCARE_TRIGGER_DIST && !state.jumpscareStarted) {
-      // retirer l'illusion au moment du jumpscare pour ne pas interférer
-      if (illusionActive) {
-        sceneEl.style.filter = '';
-        illusionActive = false;
-      }
       triggerJumpscare();
     }
   }
@@ -304,14 +273,12 @@
       `translateZ(${state.z}px) ` +
       `rotateY(${state.yaw}rad) rotateX(${state.pitch}rad) ` +
       `translateX(${-state.x}px)`;
+    world.style.transform = transform;
 
-    // appliquer le screen shake comme décalage additionnel
-    const sx = shakeX.toFixed(2);
-    const sy = shakeY.toFixed(2);
-    const shakeStr = (shakeX !== 0 || shakeY !== 0)
-      ? ` translateX(${sx}px) translateY(${sy}px)` : '';
-
-    world.style.transform = transform + shakeStr;
+    const shake = state.shake;
+    const horizontal = Math.sin(state.shakePhase * 1.07) * shake * 3.2;
+    const vertical = Math.cos(state.shakePhase * 1.63) * shake * 2.4;
+    scene.style.transform = `translate3d(${horizontal.toFixed(2)}px, ${vertical.toFixed(2)}px, 0)`;
   }
 
   // ============================================================

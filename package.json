@@ -1,17 +1,15 @@
 {
   "name": "le-couloir",
   "version": "1.0.0",
-  "description": "LE COULOIR – jeu d'horreur psychologique mobile",
   "private": true,
+  "description": "Le Couloir, jeu d'horreur psychologique hors-ligne pour Android.",
   "scripts": {
-    "cap:sync": "npx cap sync android",
-    "build:apk": "npx cap sync android && cd android && ./gradlew assembleDebug"
+    "prepare-web": "rm -rf www && mkdir -p www && cp -R index.html css js assets www/",
+    "android:sync": "npm run prepare-web && npx cap sync android"
   },
   "dependencies": {
-    "@capacitor/android": "^6.2.0",
-    "@capacitor/core": "^6.2.0"
-  },
-  "devDependencies": {
-    "@capacitor/cli": "^6.2.0"
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/cli": "^7.4.3",
+    "@capacitor/core": "^7.4.3"
   }
 }
