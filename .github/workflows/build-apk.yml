@@ -28,6 +28,8 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+      - name: Installer Android SDK
+        uses: android-actions/setup-android@v3
 
       - name: Installer Capacitor
         run: npm install
@@ -52,7 +54,7 @@ jobs:
           PY
 
       - name: Compiler l'APK
-        working-directory: game/android
+        working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug
@@ -68,6 +70,7 @@ jobs:
           if-no-files-found: error
 
       - name: Mettre à jour la release latest
+        if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
