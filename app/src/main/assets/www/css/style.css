@@ -178,3 +178,33 @@ html, body {
   font-size: 11px;
   font-family: monospace;
 }
+
+/* TV bleu – deux boutons carrés */
+.tv-blue {
+  background: linear-gradient(160deg, #1565c0, #0d47a1) !important;
+  border: 3px solid #42a5f5 !important;
+  min-width: min(320px, 85vw);
+}
+.tv-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+.tv-square {
+  aspect-ratio: 1;
+  min-height: 88px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  border: 3px solid #90caf9;
+  background: #0d47a1;
+  color: #e3f2fd;
+  border-radius: 10px;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+}
+.tv-square.selected, .tv-square:hover {
+  background: #1976d2;
+  border-color: #fff;
+  box-shadow: 0 0 16px rgba(100, 180, 255, 0.55);
+}
