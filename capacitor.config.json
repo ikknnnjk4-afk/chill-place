@@ -1,0 +1,15 @@
+{
+  "appId": "com.lecouloir.game",
+  "appName": "Le Couloir",
+  "webDir": ".",
+  "android": {
+    "allowMixedContent": false,
+    "hardwareAccelerated": true,
+    "minWebViewVersion": 90
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}

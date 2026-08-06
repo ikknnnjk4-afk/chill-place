@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>LE COULOIR</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Filtre SVG pour l'illusion d'optique (distorsion organique progressive) -->
+  <svg id="illusionSVG" style="position:fixed;width:0;height:0;pointer-events:none;overflow:hidden;">
+    <defs>
+      <filter id="opticalIllusion" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="linearRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.007 0.005" numOctaves="4" seed="3" id="illusionTurb" result="noise"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G" id="illusionDisp"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- Écran titre -->
+  <div id="titleScreen">
+    <div id="titleGlow"></div>
+    <h1 id="titleText">LE COULOIR</h1>
+    <p id="titleSub">touchez pour entrer</p>
+  </div>
+
+  <!-- Scène 3D -->
+  <div id="scene">
+    <div id="world">
+      <div id="floor"></div>
+      <div id="ceiling"></div>
+      <div id="wallLeft"></div>
+      <div id="wallRight"></div>
+      <div id="wallEnd"></div>
+      <div id="girlWrap"><img id="girl" src="assets/girl.png" alt=""></div>
+      <div id="girlLight"></div>
+    </div>
+  </div>
+
+  <!-- Overlays visuels -->
+  <canvas id="fxCanvas"></canvas>
+  <div id="vignette"></div>
+  <div id="grain"></div>
+  <div id="flash" class="hidden"></div>
+  <div id="blackout" class="hidden"></div>
+
+  <!-- HUD / contrôles mobiles -->
+  <div id="hud">
+    <div id="joystickZone">
+      <div id="joystickBase">
+        <div id="joystickThumb"></div>
+      </div>
+    </div>
+    <div id="lookZone"></div>
+  </div>
+
+  <div id="endScreen" class="hidden">
+    <p id="endText"></p>
+  </div>
+
+  <script src="js/audio.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

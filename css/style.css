@@ -1,0 +1,206 @@
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; }
+
+html, body {
+  width:100%; height:100%;
+  overflow:hidden;
+  background:#000;
+  font-family:'Georgia', 'Times New Roman', serif;
+  touch-action:none;
+}
+
+/* ---------- Écran titre ---------- */
+#titleScreen{
+  position:fixed; inset:0; z-index:50;
+  background:radial-gradient(ellipse at center, #14100c 0%, #030201 75%);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  transition:opacity 1.6s ease;
+}
+#titleScreen.hidden{ opacity:0; pointer-events:none; }
+#titleGlow{
+  position:absolute; width:60vw; height:60vw; max-width:500px; max-height:500px;
+  background:radial-gradient(circle, rgba(255,220,180,0.06) 0%, rgba(0,0,0,0) 70%);
+  animation:titlePulse 5s ease-in-out infinite;
+}
+@keyframes titlePulse{ 0%,100%{ opacity:.5; transform:scale(1);} 50%{ opacity:1; transform:scale(1.15);} }
+#titleText{
+  color:#c9bfae; letter-spacing:0.6em; font-size:8vw; font-weight:400;
+  text-shadow:0 0 25px rgba(255,200,140,0.25), 0 0 60px rgba(0,0,0,0.9);
+  z-index:2;
+}
+#titleSub{
+  margin-top:22px; color:#6b6255; letter-spacing:0.25em; font-size:3.4vw; z-index:2;
+  animation:blinkSub 2.4s ease-in-out infinite;
+}
+@keyframes blinkSub{ 0%,100%{opacity:.3;} 50%{opacity:.9;} }
+
+/* ---------- Scène 3D ---------- */
+#scene{
+  position:fixed; inset:0;
+  perspective:700px;
+  perspective-origin:50% 50%;
+  overflow:hidden;
+  background:#050403;
+}
+#world{
+  position:absolute; inset:0;
+  transform-style:preserve-3d;
+  will-change:transform;
+}
+
+/* Géométrie du couloir (unités CSS cohérentes dans tout le monde 3D)
+   largeur = 320, hauteur = 340, longueur = 6000 */
+#floor, #ceiling{
+  position:absolute;
+  width:320px; height:12000px;
+  left:50%; top:50%;
+  margin-left:-160px;
+  background-repeat:repeat;
+  background-size:160px 160px;
+}
+#floor{
+  background-image:url('../assets/floor.jpg');
+  transform-origin:top center;
+  transform:rotateX(90deg) translateY(-6000px) translateZ(170px);
+  filter:brightness(0.30) saturate(0.7) contrast(1.1);
+}
+#ceiling{
+  background-image:url('../assets/ceiling.jpg');
+  transform-origin:top center;
+  transform:rotateX(-90deg) translateY(-6000px) translateZ(170px);
+  filter:brightness(0.16) saturate(0.55) contrast(1.1);
+}
+
+#wallLeft, #wallRight{
+  position:absolute;
+  width:12000px; height:340px;
+  left:50%; top:50%;
+  margin-top:-170px; margin-left:-6000px;
+  background-image:url('../assets/wall.jpg');
+  background-repeat:repeat;
+  background-size:160px 170px;
+  filter:brightness(0.26) saturate(0.6) contrast(1.08);
+}
+#wallLeft{
+  transform-origin:center left;
+  transform:translateX(6000px) rotateY(90deg) translateZ(160px);
+}
+#wallRight{
+  transform-origin:center right;
+  transform:translateX(-6000px) rotateY(-90deg) translateZ(160px);
+}
+
+#wallEnd{
+  position:absolute;
+  width:320px; height:340px;
+  left:50%; top:50%;
+  margin-left:-160px; margin-top:-170px;
+  background-image:url('../assets/wall.jpg');
+  background-repeat:repeat;
+  background-size:160px 170px;
+  transform:translateZ(-6000px);
+  filter:brightness(0.14) saturate(0.5) contrast(1.1);
+}
+
+/* ---------- Fille ---------- */
+#girlWrap{
+  position:absolute;
+  left:50%; top:50%;
+  transform:translate(-50%,-50%) translateZ(-5750px);
+  pointer-events:none;
+  transform-style:preserve-3d;
+}
+#girl{
+  display:block;
+  height:300px;
+  width:auto;
+  transform:translateY(-125px);
+  filter:brightness(0.65) saturate(0.75) drop-shadow(0 0 10px rgba(190,205,255,0.2));
+  transition:filter 0.4s ease;
+}
+#girlLight{
+  position:absolute;
+  left:50%; top:50%;
+  width:260px; height:400px;
+  transform:translate(-50%,-50%) translateZ(-5750px) translateY(-70px);
+  background:radial-gradient(ellipse 130px 220px at center, rgba(210,225,255,0.12) 0%, rgba(210,225,255,0.0) 72%);
+  pointer-events:none;
+  mix-blend-mode:screen;
+  transition:opacity .5s ease;
+}
+
+/* ---------- Overlays ---------- */
+#fxCanvas{
+  position:fixed; inset:0; z-index:40;
+  width:100%; height:100%;
+  pointer-events:none;
+  opacity:0;
+}
+#vignette{
+  position:fixed; inset:0; z-index:20; pointer-events:none;
+  background:radial-gradient(ellipse at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.55) 78%, rgba(0,0,0,0.92) 100%);
+}
+#grain{
+  position:fixed; inset:-50%; width:200%; height:200%; z-index:21; pointer-events:none;
+  opacity:0.05; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  animation:grainMove 0.4s steps(3) infinite;
+}
+@keyframes grainMove{
+  0%{ transform:translate(0,0); }
+  33%{ transform:translate(-3%,2%); }
+  66%{ transform:translate(2%,-3%); }
+  100%{ transform:translate(0,0); }
+}
+
+#flash{
+  position:fixed; inset:0; z-index:60; background:#fff; pointer-events:none; opacity:0;
+}
+#flash.hit{ animation:flashHit 0.18s ease-out; }
+@keyframes flashHit{ 0%{opacity:1;} 100%{opacity:0;} }
+
+#blackout{
+  position:fixed; inset:0; z-index:55; background:#000; opacity:0; pointer-events:none;
+  transition:opacity .25s linear;
+}
+#blackout.on{ opacity:1; }
+.hidden{ display:none !important; }
+
+/* ---------- HUD ---------- */
+#hud{ position:fixed; inset:0; z-index:45; }
+#joystickZone{
+  position:absolute; left:0; bottom:0; width:45%; height:45%;
+}
+#lookZone{
+  position:absolute; right:0; bottom:0; width:55%; height:100%;
+}
+#joystickBase{
+  position:absolute; left:36px; bottom:36px;
+  width:120px; height:120px; border-radius:50%;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.18);
+  box-shadow:0 0 20px rgba(0,0,0,0.5) inset;
+}
+#joystickThumb{
+  position:absolute; left:50%; top:50%; width:52px; height:52px; border-radius:50%;
+  background:rgba(230,220,205,0.28);
+  border:1px solid rgba(255,255,255,0.35);
+  transform:translate(-50%,-50%);
+  transition:background .15s;
+}
+#joystickBase.active #joystickThumb{ background:rgba(230,220,205,0.5); }
+
+#endScreen{
+  position:fixed; inset:0; z-index:70;
+  background:#fff;
+  display:flex; align-items:center; justify-content:center;
+  transition:background 3s linear;
+}
+#endText{
+  color:#000; font-size:5vw; letter-spacing:0.3em; opacity:0; transition:opacity 3s linear;
+}
+
+@media (min-width:900px){
+  #titleText{ font-size:56px; }
+  #titleSub{ font-size:16px; }
+  #endText{ font-size:32px; }
+}
